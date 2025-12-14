@@ -1,0 +1,115 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+
+# .gitignore file created for free with Tower (https://www.git-tower.com/)
+# For suggestions or improvements please contact us using support@git-tower.com
+# Generated on 2025-12-14
+# Includes: flutter, dart
+
+### Universal ###
+# Common files that should be ignored in all projects
+
+# Logs
+*.log
+# Temporary files
+*.tmp
+*~
+
+*.bak
+# Environment files (containing secrets, API keys, credentials)
+.env
+*.env
+.env.*
+
+# Local configuration that shouldn't be shared
+*.local
+
+### Flutter ###
+# Flutter/Dart build files and dependencies
+
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+.pub-cache/
+.pub/
+/build/
+.metadata
+*.freezed.dart
+
+*.g.dart
+*.mocks.dart
+*.lock
+*.log
+*.pyc
+
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+
+.svn/
+*.iml
+*.iws
+.idea/
+.metadata
+
+/ios/ /profile
+**/ios/Flutter/.last_build_id
+**/android/gradlew
+**/android/gradlew.bat
+
+### Dart ###
+# dart specific files
+
+.dart_tool/
+packages/
+*.lock
+.pub/
