@@ -101,67 +101,67 @@ class _NearbyRestaurantsScreenState extends State<NearbyRestaurantsScreen> {
   }
 
   // DEPRECATED: Old sample generation method (kept for reference)
-  List<RestaurantModel> _generateSampleRestaurants_OLD(Position position) {
-    final sampleRestaurants = [
-      {
-        'name': 'The Italian Kitchen',
-        'latOffset': 0.01,
-        'lonOffset': 0.01,
-        'address': '123 Main Street',
-        'rating': 4.5
-      },
-      {
-        'name': 'Spice House',
-        'latOffset': -0.02,
-        'lonOffset': 0.015,
-        'address': '456 Oak Avenue',
-        'rating': 4.2
-      },
-      {
-        'name': 'Burger Palace',
-        'latOffset': 0.015,
-        'lonOffset': -0.01,
-        'address': '789 Pine Road',
-        'rating': 4.0
-      },
-      {
-        'name': 'Sushi Bar',
-        'latOffset': -0.01,
-        'lonOffset': -0.02,
-        'address': '321 Elm Street',
-        'rating': 4.7
-      },
-      {
-        'name': 'Pasta Paradise',
-        'latOffset': 0.02,
-        'lonOffset': 0.02,
-        'address': '654 Maple Drive',
-        'rating': 4.3
-      },
-    ];
+  // List<RestaurantModel> _generateSampleRestaurants_OLD(Position position) {
+  //   final sampleRestaurants = [
+  //     {
+  //       'name': 'The Italian Kitchen',
+  //       'latOffset': 0.01,
+  //       'lonOffset': 0.01,
+  //       'address': '123 Main Street',
+  //       'rating': 4.5
+  //     },
+  //     {
+  //       'name': 'Spice House',
+  //       'latOffset': -0.02,
+  //       'lonOffset': 0.015,
+  //       'address': '456 Oak Avenue',
+  //       'rating': 4.2
+  //     },
+  //     {
+  //       'name': 'Burger Palace',
+  //       'latOffset': 0.015,
+  //       'lonOffset': -0.01,
+  //       'address': '789 Pine Road',
+  //       'rating': 4.0
+  //     },
+  //     {
+  //       'name': 'Sushi Bar',
+  //       'latOffset': -0.01,
+  //       'lonOffset': -0.02,
+  //       'address': '321 Elm Street',
+  //       'rating': 4.7
+  //     },
+  //     {
+  //       'name': 'Pasta Paradise',
+  //       'latOffset': 0.02,
+  //       'lonOffset': 0.02,
+  //       'address': '654 Maple Drive',
+  //       'rating': 4.3
+  //     },
+  //   ];
 
-    return sampleRestaurants.map((data) {
-      final lat = position.latitude + (data['latOffset'] as double);
-      final lon = position.longitude + (data['lonOffset'] as double);
-      final distance = _locationService.calculateDistance(
-        position.latitude,
-        position.longitude,
-        lat,
-        lon,
-      );
+  //   return sampleRestaurants.map((data) {
+  //     final lat = position.latitude + (data['latOffset'] as double);
+  //     final lon = position.longitude + (data['lonOffset'] as double);
+  //     final distance = _locationService.calculateDistance(
+  //       position.latitude,
+  //       position.longitude,
+  //       lat,
+  //       lon,
+  //     );
 
-      return RestaurantModel(
-        id: data['name'].toString().toLowerCase().replaceAll(' ', '_'),
-        name: data['name'] as String,
-        latitude: lat,
-        longitude: lon,
-        address: data['address'] as String,
-        rating: data['rating'] as double,
-        distance: distance,
-      );
-    }).toList()
-      ..sort((a, b) => a.distance.compareTo(b.distance));
-  }
+  //     return RestaurantModel(
+  //       id: data['name'].toString().toLowerCase().replaceAll(' ', '_'),
+  //       name: data['name'] as String,
+  //       latitude: lat,
+  //       longitude: lon,
+  //       address: data['address'] as String,
+  //       rating: data['rating'] as double,
+  //       distance: distance,
+  //     );
+  //   }).toList()
+  //     ..sort((a, b) => a.distance.compareTo(b.distance));
+  // }
 
   @override
   Widget build(BuildContext context) {
