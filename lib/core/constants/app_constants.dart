@@ -13,7 +13,7 @@ class ApiConstants {
   
   // Google Places API (for real restaurants)
   static const String googlePlacesBaseUrl = 'https://maps.googleapis.com/maps/api/place';
-  static final googlePlacesApiKey = dotenv.env['MAPS_API_KEY'] ?? ''; // Same as YouTube key
+  static final googlePlacesApiKey = dotenv.env['MAPS_API_KEY'] ?? '';
 }
 
 // App Constants
