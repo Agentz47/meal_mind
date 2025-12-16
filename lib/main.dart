@@ -3,34 +3,29 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'providers/purchase_list_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'firebase_options.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
-  
+  runApp(MyApp());
   // Initialize Firebase
-  bool firebaseInitialized = false;
+
   try {
-    await Firebase.initializeApp();
-    firebaseInitialized = true;
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
     debugPrint('✅ Firebase initialized successfully');
   } catch (e) {
     debugPrint('⚠️ Firebase not configured - running in offline mode');
     debugPrint('   To enable cloud sync, add google-services.json');
   }
-  
+
   // Initialize Hive for offline storage
-
-
-  
-
 }
 
 class MyApp extends StatelessWidget {
-
-  
-
-
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -60,8 +55,6 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
 
-
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -71,7 +64,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-  
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
@@ -79,14 +71,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Saved',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Saved'),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             label: 'Shopping',
