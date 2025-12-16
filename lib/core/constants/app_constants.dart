@@ -5,7 +5,6 @@ class ApiConstants {
   // Spoonacular API
   static const String spoonacularBaseUrl = 'https://api.spoonacular.com';
   static final spoonacularApiKey = dotenv.env['SPOONACULAR_API_KEY'];
-  //2051b2555d7340ec9f617b28333e9607 #use this key if the above one stops working
   
   // YouTube API
   static const String youtubeBaseUrl = 'https://www.googleapis.com/youtube/v3';
@@ -13,7 +12,7 @@ class ApiConstants {
   
   // Google Places API (for real restaurants)
   static const String googlePlacesBaseUrl = 'https://maps.googleapis.com/maps/api/place';
-  static final googlePlacesApiKey = dotenv.env['MAPS_API_KEY'] ?? '';
+  static final googlePlacesApiKey = dotenv.env['MAPS_API_KEY'] ?? ''; 
 }
 
 // App Constants

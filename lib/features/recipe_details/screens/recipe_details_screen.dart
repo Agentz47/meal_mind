@@ -6,14 +6,17 @@ import '../../../providers/recipe_provider.dart';
 import '../../../providers/purchase_list_provider.dart';
 import '../widgets/ingredient_list_item_widget.dart';
 import 'cooking_instructions_screen.dart';
-// import '../../videos/screens/cooking_video_screen.dart';
+import '../../videos/screens/cooking_video_screen.dart';
 
 // Screen showing detailed recipe information
 // Member 2 - Recipe Details Feature
 class RecipeDetailsScreen extends StatefulWidget {
   final RecipeModel recipe;
 
-  const RecipeDetailsScreen({super.key, required this.recipe});
+  const RecipeDetailsScreen({
+    super.key,
+    required this.recipe,
+  });
 
   @override
   State<RecipeDetailsScreen> createState() => _RecipeDetailsScreenState();
@@ -32,13 +35,9 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   }
 
   void _loadNote() async {
-    final favoriteProvider = Provider.of<FavoriteProvider>(
-      context,
-      listen: false,
-    );
-    final note = await favoriteProvider.getUserNote(
-      widget.recipe.id.toString(),
-    );
+    final favoriteProvider =
+        Provider.of<FavoriteProvider>(context, listen: false);
+    final note = await favoriteProvider.getUserNote(widget.recipe.id.toString());
     if (note != null) {
       _noteController.text = note;
     }
@@ -61,26 +60,22 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   }
 
   void _saveNote() async {
-    final favoriteProvider = Provider.of<FavoriteProvider>(
-      context,
-      listen: false,
-    );
+    final favoriteProvider =
+        Provider.of<FavoriteProvider>(context, listen: false);
     await favoriteProvider.saveUserNote(
       widget.recipe.id.toString(),
       _noteController.text,
     );
     if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Note saved!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Note saved!')),
+      );
     }
   }
 
   void _toggleFavorite() async {
-    final favoriteProvider = Provider.of<FavoriteProvider>(
-      context,
-      listen: false,
-    );
+    final favoriteProvider =
+        Provider.of<FavoriteProvider>(context, listen: false);
     if (favoriteProvider.isFavorite(widget.recipe.id)) {
       await favoriteProvider.removeFromFavorites(widget.recipe.id);
     } else {
@@ -89,22 +84,16 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   }
 
   void _addAllToPurchaseList() async {
-    final purchaseProvider = Provider.of<PurchaseListProvider>(
-      context,
-      listen: false,
-    );
-
+    final purchaseProvider =
+        Provider.of<PurchaseListProvider>(context, listen: false);
+    
     // Prepare ingredients list
-    final ingredients = widget.recipe.ingredients
-        .map(
-          (ing) => {
-            'name': ing.name,
-            'amount': ing.amount.toString(),
-            'unit': ing.unit,
-          },
-        )
-        .toList();
-
+    final ingredients = widget.recipe.ingredients.map((ing) => {
+      'name': ing.name,
+      'amount': ing.amount.toString(),
+      'unit': ing.unit,
+    }).toList();
+    
     try {
       // Create new list with all ingredients
       await purchaseProvider.createListFromRecipe(
@@ -112,7 +101,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
         recipeId: widget.recipe.id.toString(),
         ingredients: ingredients,
       );
-
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -129,9 +118,9 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to create list: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create list: $e')),
+        );
       }
     }
   }
@@ -245,42 +234,52 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: _isLoadingDetails
-                              ? null
-                              : () {
-                                  final recipe = _fullRecipe ?? widget.recipe;
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          CookingInstructionsScreen(
-                                            recipe: recipe,
-                                          ),
-                                    ),
-                                  );
-                                },
-                          icon: _isLoadingDetails
+                          onPressed: _isLoadingDetails ? null : () {
+                            final recipe = _fullRecipe ?? widget.recipe;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CookingInstructionsScreen(recipe: recipe),
+                              ),
+                            );
+                          },
+                          icon: _isLoadingDetails 
                               ? const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
+                                  child: CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Icon(Icons.menu_book),
-                          label: Text(
-                            _isLoadingDetails ? 'Loading...' : 'Instructions',
-                          ),
+                          label: Text(_isLoadingDetails ? 'Loading...' : 'Instructions'),
                         ),
                       ),
                       const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CookingVideoScreen(recipeName: widget.recipe.title),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.play_circle),
+                          label: const Text('Videos'),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
                   // Notes section
                   const Text(
                     'My Notes',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
