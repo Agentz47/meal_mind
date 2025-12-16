@@ -83,6 +83,13 @@ build/
 .metadata
 *.freezed.dart
 
+# Firebase
+firebase.json
+.firebaserc
+android/app/google-services.json
+
+
+
 *.g.dart
 *.mocks.dart
 *.lock
