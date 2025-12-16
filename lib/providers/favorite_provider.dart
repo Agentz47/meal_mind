@@ -108,17 +108,6 @@ class FavoriteProvider with ChangeNotifier {
       }
 
       // Try to sync with Firebase if available
-        /// Utility: Clear all favorites from Hive (for troubleshooting)
-        Future<void> clearFavoritesBox() async {
-          try {
-            await _favoritesBox?.clear();
-            debugPrint('Favorites box cleared.');
-            _favorites = [];
-            notifyListeners();
-          } catch (e) {
-            debugPrint('Error clearing favorites box: $e');
-          }
-        }
       try {
         if (_firebase.isAvailable) {
           final firebaseRecipes = await _firebase.getSavedRecipes();
@@ -225,6 +214,18 @@ class FavoriteProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Error syncing to Firebase: $e');
+    }
+  }
+
+  /// Utility: Clear all favorites from Hive (for troubleshooting)
+  Future<void> clearFavoritesBox() async {
+    try {
+      await _favoritesBox?.clear();
+      debugPrint('Favorites box cleared.');
+      _favorites = [];
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error clearing favorites box: $e');
     }
   }
 }
