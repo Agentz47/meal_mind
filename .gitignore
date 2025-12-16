@@ -38,7 +38,6 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
-firebase.json
 
 # Android Studio will place build artifacts here
 /android/app/debug
@@ -83,6 +82,10 @@ build/
 /build/
 .metadata
 *.freezed.dart
+
+# Firebase
+firebase.json
+.firebaserc
 
 *.g.dart
 *.mocks.dart
