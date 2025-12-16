@@ -86,7 +86,8 @@ build/
 # Firebase
 firebase.json
 .firebaserc
-app/google-services.json
+android/app/google-services.json
+
 
 
 *.g.dart
