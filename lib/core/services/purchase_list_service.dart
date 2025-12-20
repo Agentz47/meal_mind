@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../models/purchase_item_model.dart';
 import '../../models/purchase_list_model.dart';
@@ -25,7 +26,7 @@ class PurchaseListService {
       _listsBox = await Hive.openBox<Map>(_listsBoxName);
       _itemsBox = await Hive.openBox<Map>(_itemsBoxName);
     } catch (e) {
-      print('Error initializing purchase list Hive boxes: $e');
+      debugPrint('Error initializing purchase list Hive boxes: $e');
     }
   }
 
@@ -49,7 +50,7 @@ class PurchaseListService {
         await _cacheListsToHive(lists);
         return lists;
       } catch (e) {
-        print('Firestore error, using offline data: $e');
+        debugPrint('Firestore error, using offline data: $e');
       }
     }
     return _getListsFromHive();
@@ -57,34 +58,34 @@ class PurchaseListService {
 
   /// Create new list
   Future<void> createList(PurchaseListModel list) async {
-    if (_firestore != null) {
-      try {
-        await _firestore!
-            .collection('purchase_lists')
-            .doc(list.id)
-            .set(list.toJson());
-      } catch (e) {
-        print('Error creating list in Firestore: $e');
-      }
-    }
+    // Save to Hive first (immediate, works offline)
     await _addListToHive(list);
+    
+    // Sync to Firebase in background (don't wait)
+    if (_firestore != null) {
+      _firestore!
+          .collection('purchase_lists')
+          .doc(list.id)
+          .set(list.toJson())
+          .catchError((e) => debugPrint('Error creating list in Firestore: $e'));
+    }
   }
 
   /// Update list
   Future<void> updateList(PurchaseListModel list) async {
     final updatedList = list.copyWith(updatedAt: DateTime.now());
     
-    if (_firestore != null) {
-      try {
-        await _firestore!
-            .collection('purchase_lists')
-            .doc(list.id)
-            .update(updatedList.toJson());
-      } catch (e) {
-        print('Error updating list in Firestore: $e');
-      }
-    }
+    // Save to Hive first (immediate, works offline)
     await _updateListInHive(updatedList);
+    
+    // Sync to Firebase in background (don't wait)
+    if (_firestore != null) {
+      _firestore!
+          .collection('purchase_lists')
+          .doc(list.id)
+          .update(updatedList.toJson())
+          .catchError((e) => debugPrint('Error updating list in Firestore: $e'));
+    }
   }
 
   /// Delete list and all its items
@@ -95,18 +96,17 @@ class PurchaseListService {
       await deleteItem(item.id);
     }
 
-    // Delete the list
-    if (_firestore != null) {
-      try {
-        await _firestore!
-            .collection('purchase_lists')
-            .doc(listId)
-            .delete();
-      } catch (e) {
-        print('Error deleting list from Firestore: $e');
-      }
-    }
+    // Delete from Hive first (immediate, works offline)
     await _deleteListFromHive(listId);
+    
+    // Delete from Firebase in background (don't wait)
+    if (_firestore != null) {
+      _firestore!
+          .collection('purchase_lists')
+          .doc(listId)
+          .delete()
+          .catchError((e) => debugPrint('Error deleting list from Firestore: $e'));
+    }
   }
 
   // ===== ITEM OPERATIONS =====
@@ -128,7 +128,7 @@ class PurchaseListService {
         await _cacheItemsToHive(items);
         return items;
       } catch (e) {
-        print('Firestore error, using offline data: $e');
+        debugPrint('Firestore error, using offline data: $e');
       }
     }
     return _getItemsFromHive(listId);
@@ -136,72 +136,76 @@ class PurchaseListService {
 
   /// Add item to a list
   Future<void> addItem(PurchaseItemModel item) async {
-    if (_firestore != null) {
-      try {
-        await _firestore!
-            .collection('purchase_items')
-            .doc(item.id)
-            .set(item.toJson());
-        
-        // Update list's updatedAt timestamp
-        await _firestore!
-            .collection('purchase_lists')
-            .doc(item.listId)
-            .update({'updatedAt': DateTime.now().toIso8601String()});
-      } catch (e) {
-        print('Error adding item to Firestore: $e');
-      }
-    }
+    // Save to Hive first (immediate, works offline)
     await _addItemToHive(item);
+    
+    // Sync to Firebase in background (don't wait)
+    if (_firestore != null) {
+      _firestore!
+          .collection('purchase_items')
+          .doc(item.id)
+          .set(item.toJson())
+          .then((_) {
+            // Update list's updatedAt timestamp
+            return _firestore!
+                .collection('purchase_lists')
+                .doc(item.listId)
+                .update({'updatedAt': DateTime.now().toIso8601String()});
+          })
+          .catchError((e) => debugPrint('Error adding item to Firestore: $e'));
+    }
   }
 
   /// Update item (full replacement)
   Future<void> updateItem(PurchaseItemModel item) async {
-    if (_firestore != null) {
-      try {
-        await _firestore!
-            .collection('purchase_items')
-            .doc(item.id)
-            .set(item.toJson()); // Use set instead of update to replace fully
-        
-        // Update list's updatedAt timestamp
-        await _firestore!
-            .collection('purchase_lists')
-            .doc(item.listId)
-            .update({'updatedAt': DateTime.now().toIso8601String()});
-      } catch (e) {
-        print('Error updating item in Firestore: $e');
-      }
-    }
+    // Save to Hive first (immediate, works offline)
     await _updateItemInHive(item);
+    
+    // Sync to Firebase in background (don't wait)
+    if (_firestore != null) {
+      _firestore!
+          .collection('purchase_items')
+          .doc(item.id)
+          .set(item.toJson()) // Use set instead of update to replace fully
+          .then((_) {
+            // Update list's updatedAt timestamp
+            return _firestore!
+                .collection('purchase_lists')
+                .doc(item.listId)
+                .update({'updatedAt': DateTime.now().toIso8601String()});
+          })
+          .catchError((e) => debugPrint('Error updating item in Firestore: $e'));
+    }
   }
 
   /// Delete item
   Future<void> deleteItem(String itemId) async {
-    if (_firestore != null) {
-      try {
-        final doc = await _firestore!
-            .collection('purchase_items')
-            .doc(itemId)
-            .get();
-        
-        if (doc.exists) {
-          final listId = doc.data()?['listId'];
-          await _firestore!.collection('purchase_items').doc(itemId).delete();
-          
-          // Update list's updatedAt timestamp
-          if (listId != null) {
-            await _firestore!
-                .collection('purchase_lists')
-                .doc(listId)
-                .update({'updatedAt': DateTime.now().toIso8601String()});
-          }
-        }
-      } catch (e) {
-        print('Error deleting item from Firestore: $e');
-      }
-    }
+    // Delete from Hive first (immediate, works offline)
     await _deleteItemFromHive(itemId);
+    
+    // Delete from Firebase in background (don't wait)
+    if (_firestore != null) {
+      _firestore!
+          .collection('purchase_items')
+          .doc(itemId)
+          .get()
+          .then((doc) {
+            if (doc.exists) {
+              final listId = doc.data()?['listId'];
+              return _firestore!.collection('purchase_items').doc(itemId).delete()
+                  .then((_) {
+                    // Update list's updatedAt timestamp
+                    if (listId != null) {
+                      return _firestore!
+                          .collection('purchase_lists')
+                          .doc(listId)
+                          .update({'updatedAt': DateTime.now().toIso8601String()});
+                    }
+                  });
+            }
+          })
+          .catchError((e) => debugPrint('Error deleting item from Firestore: $e'));
+    }
   }
 
   /// Delete all purchased items in a list

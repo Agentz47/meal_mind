@@ -35,21 +35,30 @@ class _EditListDialogState extends State<EditListDialog> {
 
   void _updateList() async {
     if (_formKey.currentState!.validate()) {
-      final updatedList = widget.list.copyWith(
-        name: _nameController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty
-            ? null
-            : _descriptionController.text.trim(),
-      );
-
-      await Provider.of<PurchaseListProvider>(context, listen: false)
-          .updateList(updatedList);
-      
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('List updated')),
+      try {
+        final updatedList = widget.list.copyWith(
+          name: _nameController.text.trim(),
+          description: _descriptionController.text.trim().isEmpty
+              ? null
+              : _descriptionController.text.trim(),
         );
+
+        await Provider.of<PurchaseListProvider>(context, listen: false)
+            .updateList(updatedList);
+        
+        Navigator.of(context, rootNavigator: true).pop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('List updated')),
+          );
+        }
+      } catch (e) {
+        Navigator.of(context, rootNavigator: true).pop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to update list: $e')),
+          );
+        }
       }
     }
   }

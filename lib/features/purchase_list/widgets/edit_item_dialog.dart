@@ -42,20 +42,29 @@ class _EditItemDialogState extends State<EditItemDialog> {
 
   void _updateItem() async {
     if (_formKey.currentState!.validate()) {
-      final updatedItem = widget.item.copyWith(
-        name: _nameController.text.trim(),
-        amount: _amountController.text.trim(),
-        unit: _unitController.text.trim(),
-      );
-
-      await Provider.of<PurchaseListProvider>(context, listen: false)
-          .updateItem(widget.listId, updatedItem);
-
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item updated')),
+      try {
+        final updatedItem = widget.item.copyWith(
+          name: _nameController.text.trim(),
+          amount: _amountController.text.trim(),
+          unit: _unitController.text.trim(),
         );
+
+        await Provider.of<PurchaseListProvider>(context, listen: false)
+            .updateItem(widget.listId, updatedItem);
+
+        Navigator.of(context, rootNavigator: true).pop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Item updated')),
+          );
+        }
+      } catch (e) {
+        Navigator.of(context, rootNavigator: true).pop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to update item: $e')),
+          );
+        }
       }
     }
   }

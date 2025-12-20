@@ -26,18 +26,29 @@ class _AddItemDialogState extends State<AddItemDialog> {
     super.dispose();
   }
 
-  void _addItem() {
+  void _addItem() async {
     if (_formKey.currentState!.validate()) {
-      Provider.of<PurchaseListProvider>(context, listen: false).addItemToList(
-        listId: widget.listId,
-        name: _nameController.text.trim(),
-        amount: _amountController.text.trim(),
-        unit: _unitController.text.trim(),
-      );
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Item added')),
-      );
+      try {
+        await Provider.of<PurchaseListProvider>(context, listen: false).addItemToList(
+          listId: widget.listId,
+          name: _nameController.text.trim(),
+          amount: _amountController.text.trim(),
+          unit: _unitController.text.trim(),
+        );
+        Navigator.of(context, rootNavigator: true).pop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Item added')),
+          );
+        }
+      } catch (e) {
+        Navigator.of(context, rootNavigator: true).pop();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to add item: $e')),
+          );
+        }
+      }
     }
   }
 
