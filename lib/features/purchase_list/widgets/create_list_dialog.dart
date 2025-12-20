@@ -31,13 +31,14 @@ class _CreateListDialogState extends State<CreateListDialog> {
               ? null
               : _descriptionController.text.trim(),
         );
+        Navigator.of(context, rootNavigator: true).pop();
         if (mounted) {
-          Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('List created successfully')),
           );
         }
       } catch (e) {
+        Navigator.of(context, rootNavigator: true).pop();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Failed to create list: $e')),

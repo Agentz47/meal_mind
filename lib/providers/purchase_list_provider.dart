@@ -67,14 +67,21 @@ class PurchaseListProvider with ChangeNotifier {
       recipeName: recipeName,
     );
 
+    // Update local state immediately for instant UI response
+    _lists.add(list);
+    _itemsByList[list.id] = [];
+    notifyListeners();
+
     try {
       await _service.createList(list);
-      await loadLists();
       return list.id;
     } catch (e) {
+      // Rollback on error
+      _lists.removeWhere((l) => l.id == list.id);
+      _itemsByList.remove(list.id);
       _error = 'Failed to create list: $e';
       notifyListeners();
-      rethrow;
+      throw Exception('Failed to create list');
     }
   }
 
@@ -105,23 +112,49 @@ class PurchaseListProvider with ChangeNotifier {
 
   /// Update list
   Future<void> updateList(PurchaseListModel list) async {
+    // Find and update local state immediately
+    final index = _lists.indexWhere((l) => l.id == list.id);
+    final oldList = index >= 0 ? _lists[index] : null;
+    
+    if (index >= 0) {
+      _lists[index] = list;
+      notifyListeners();
+    }
+
     try {
       await _service.updateList(list);
-      await loadLists();
     } catch (e) {
+      // Rollback on error
+      if (index >= 0 && oldList != null) {
+        _lists[index] = oldList;
+      }
       _error = 'Failed to update list: $e';
       notifyListeners();
+      throw Exception('Failed to update list');
     }
   }
 
   /// Delete list
   Future<void> deleteList(String listId) async {
+    // Remove from local state immediately
+    final removedList = _lists.firstWhere((l) => l.id == listId);
+    final removedItems = _itemsByList[listId];
+    
+    _lists.removeWhere((l) => l.id == listId);
+    _itemsByList.remove(listId);
+    notifyListeners();
+
     try {
       await _service.deleteList(listId);
-      await loadLists();
     } catch (e) {
+      // Rollback on error
+      _lists.add(removedList);
+      if (removedItems != null) {
+        _itemsByList[listId] = removedItems;
+      }
       _error = 'Failed to delete list: $e';
       notifyListeners();
+      throw Exception('Failed to delete list');
     }
   }
 
@@ -140,65 +173,110 @@ class PurchaseListProvider with ChangeNotifier {
       unit: unit,
     );
 
+    // Add to local state immediately
+    if (_itemsByList[listId] == null) {
+      _itemsByList[listId] = [];
+    }
+    _itemsByList[listId]!.add(item);
+    notifyListeners();
+
     try {
       await _service.addItem(item);
-      _itemsByList[listId] = await _service.getItemsByList(listId);
-      notifyListeners();
     } catch (e) {
+      // Rollback on error
+      _itemsByList[listId]?.removeWhere((i) => i.id == item.id);
       _error = 'Failed to add item: $e';
       notifyListeners();
+      throw Exception('Failed to add item');
     }
   }
 
   /// Toggle item purchased status
   Future<void> toggleItemPurchased(String listId, String itemId) async {
     final items = _itemsByList[listId] ?? [];
-    final item = items.firstWhere((i) => i.id == itemId);
+    final index = items.indexWhere((i) => i.id == itemId);
+    if (index < 0) return;
+    
+    final item = items[index];
     final updatedItem = item.copyWith(isPurchased: !item.isPurchased);
+    
+    // Update local state immediately
+    _itemsByList[listId]![index] = updatedItem;
+    notifyListeners();
 
     try {
       await _service.updateItem(updatedItem);
-      _itemsByList[listId] = await _service.getItemsByList(listId);
-      notifyListeners();
     } catch (e) {
+      // Rollback on error
+      _itemsByList[listId]![index] = item;
       _error = 'Failed to update item: $e';
       notifyListeners();
+      throw Exception('Failed to toggle item');
     }
   }
 
   /// Update item (for editing name, amount, unit)
   Future<void> updateItem(String listId, PurchaseItemModel item) async {
+    final items = _itemsByList[listId] ?? [];
+    final index = items.indexWhere((i) => i.id == item.id);
+    final oldItem = index >= 0 ? items[index] : null;
+    
+    // Update local state immediately
+    if (index >= 0) {
+      _itemsByList[listId]![index] = item;
+      notifyListeners();
+    }
+
     try {
       await _service.updateItem(item);
-      _itemsByList[listId] = await _service.getItemsByList(listId);
-      notifyListeners();
     } catch (e) {
+      // Rollback on error
+      if (index >= 0 && oldItem != null) {
+        _itemsByList[listId]![index] = oldItem;
+      }
       _error = 'Failed to update item: $e';
       notifyListeners();
+      throw Exception('Failed to update item');
     }
   }
 
   /// Delete item
   Future<void> deleteItem(String listId, String itemId) async {
+    final items = _itemsByList[listId] ?? [];
+    final removedItem = items.firstWhere((i) => i.id == itemId);
+    
+    // Remove from local state immediately
+    _itemsByList[listId]?.removeWhere((i) => i.id == itemId);
+    notifyListeners();
+
     try {
       await _service.deleteItem(itemId);
-      _itemsByList[listId] = await _service.getItemsByList(listId);
-      notifyListeners();
     } catch (e) {
+      // Rollback on error
+      _itemsByList[listId]?.add(removedItem);
       _error = 'Failed to delete item: $e';
       notifyListeners();
+      throw Exception('Failed to delete item');
     }
   }
 
   /// Delete all purchased items in a list
   Future<void> deleteAllPurchasedInList(String listId) async {
+    final items = _itemsByList[listId] ?? [];
+    final removedItems = items.where((i) => i.isPurchased).toList();
+    
+    // Remove from local state immediately
+    _itemsByList[listId]?.removeWhere((i) => i.isPurchased);
+    notifyListeners();
+
     try {
       await _service.deleteAllPurchasedInList(listId);
-      _itemsByList[listId] = await _service.getItemsByList(listId);
-      notifyListeners();
     } catch (e) {
+      // Rollback on error
+      _itemsByList[listId]?.addAll(removedItems);
       _error = 'Failed to clear purchased items: $e';
       notifyListeners();
+      throw Exception('Failed to clear purchased items');
     }
   }
 }
